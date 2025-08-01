@@ -11,7 +11,9 @@ import cv2
 import numpy as np
 from datetime import datetime
 import threading
-from model_integration import YOLOv11WeedDetector
+import base64
+from model_integration import YOLOv8WeedDetector
+import resend
 
 # Set appearance mode and color theme
 ctk.set_appearance_mode("light")
@@ -38,25 +40,27 @@ class RiceWeedDetectorApp:
         
         # Show home page
         self.show_home_page()
+        
+        resend.api_key = "re_Lw6fGjzZ_3WtN5JNbALdC92Jigy686CkA"
     
     def initialize_detector(self):
         """Initialize YOLO detector with proper error handling"""
         try:
             # Try different model paths
-            model_paths = ["yolo11s.pt", "yolov8n.pt"]
+            model_paths = ["best.pt"]
             
             for model_path in model_paths:
                 if os.path.exists(model_path):
                     print(f"Trying to load model: {model_path}")
-                    self.detector = YOLOv11WeedDetector(model_path)
+                    self.detector = YOLOv8WeedDetector(model_path)
                     if self.detector.model is not None:
                         print(f"Successfully loaded model: {model_path}")
                         return
                     
             # If no local model found, try to download a default one
-            print("No local model found. Downloading YOLOv8n...")
-            self.detector = YOLOv11WeedDetector("yolov8n.pt")  # This will auto-download
-            
+            print("No local model found. Downloading best.pt...")
+            self.detector = YOLOv8WeedDetector("best.pt")  # This will auto-download
+
         except Exception as e:
             print(f"Error initializing detector: {e}")
             self.detector = None
@@ -127,10 +131,10 @@ class RiceWeedDetectorApp:
             content_frame,
             text="Welcome to the Advanced Rice Weed Detection System\n\n"
                  "Our cutting-edge AI-powered solution helps farmers identify and manage weeds in rice crops\n"
-                 "with unprecedented accuracy. Using state-of-the-art YOLOv11 deep learning technology,\n"
+                 "with unprecedented accuracy. Using state-of-the-art YOLOv8n deep learning technology,\n"
                  "we provide real-time weed detection and automated alert systems.\n\n"
                  "🔍 Key Features:\n"
-                 "• Real-time weed detection using YOLOv11\n"
+                 "• Real-time weed detection using YOLOv8n\n"
                  "• Instant email alerts for detected weeds\n"
                  "• User-friendly dashboard with crop analytics\n"
                  "• Secure user authentication system\n"
@@ -345,6 +349,60 @@ class RiceWeedDetectorApp:
         )
         register_btn.pack(fill="x", padx=20, pady=20)
     
+    
+    def send_resend_email(self, frame, confidence):
+        
+        user_data = self.users[self.current_user]
+        
+        # Convert PIL Image to numpy array if needed
+        if hasattr(frame, 'mode') and hasattr(frame, 'size'):
+            frame = np.array(frame)
+            if frame.shape[-1] == 3:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+        if frame.dtype == np.float32:
+            frame = frame.astype('uint8')
+        
+        try:
+            # Ensure frame doesn't contain numpy.float32 values by converting to uint8
+            #frame = frame.astype('uint8') if frame.dtype == np.float32 else frame
+
+            # Encode the image to JPEG in memory
+            #_, buffer = cv2.imencode('.jpg', frame)
+            #jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+            
+            # Encode the image to JPEG in memory
+            _, buffer = cv2.imencode('.jpg', frame)
+            jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+
+            params = {
+                "from": "Rice Weed Alert <no-reply@kargoxlogistics.com>",
+                "to": ["princolosh@gmail.com"],
+                "subject": f"RICE WEED ALERT - {self.current_user}",
+                "html": f"""
+                <h2>Dear {user_data['name']}</h2>
+                <p>Our AI system has detected weed(s) in your rice crop at {user_data['location']}.</p>
+                <p>Weed Severity: {confidence:.1%}</p>
+                <p>Immediate attention is recommended to prevent crop damage.</p>
+                <p>Detection Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p>Please check the attached image and take appropriate action.</p>
+                """,
+                "attachments": [{
+                    "filename": "accident.jpg",
+                    "content": jpg_as_text
+                }]
+            }
+
+            response = resend.Emails.send(params)
+            print("Email sent:", response)
+            #self.update_status_signal.emit(f"ALERT SENT! {self.camera_combo.currentText()} - Accident Detected")
+
+        except Exception as e:
+            error_msg = f"Failed to send email: {e}"
+            print(error_msg)
+            #self.update_status_signal.emit(error_msg)
+        
+        
     def login(self):
         """Handle user login"""
         email = self.email_entry.get().strip()
@@ -487,14 +545,14 @@ class RiceWeedDetectorApp:
             return
         
         # Show loading message
-        self.image_label.configure(text="🔄 Processing image...\nRunning YOLOv11 detection...")
+        self.image_label.configure(text="🔄 Processing image...\nRunning YOLOv8n detection...")
         self.root.update()
         
         # Process image in a separate thread to prevent UI freezing
         threading.Thread(target=self.process_image, args=(file_path,), daemon=True).start()
     
     def process_image(self, file_path):
-        """Process image with YOLOv11 model using supervision"""
+        """Process image with YOLOv8 model using supervision"""
         try:
             print(f"Processing image: {file_path}")
             
@@ -510,7 +568,7 @@ class RiceWeedDetectorApp:
                 annotated_image, weed_detected, detection_count, weed_confidence = result
                 
                 # Resize for display
-                display_size = (400, 300)
+                display_size = (500, 500)
                 annotated_resized = annotated_image.resize(display_size, Image.Resampling.LANCZOS)
             
                 # Update UI in main thread
@@ -545,9 +603,13 @@ class RiceWeedDetectorApp:
         
             # Send warning email
             self.send_warning_email(detection_count, weed_confidence)
+
+            email_thread = threading.Thread(target=self.send_resend_email, args=(annotated_image, weed_confidence),  # <-- Note the comma!
+                                            daemon=True)
+            email_thread.start()
         
             # Save detection record
-            self.save_detection_record(original_path, True, detection_count, weed_confidence)
+            #self.save_detection_record(original_path, True, detection_count, weed_confidence)
         
         else:
             result_text = "✅ No weeds detected\nCrop looks healthy!"

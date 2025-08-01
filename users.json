@@ -12,33 +12,6 @@
         "image_path": "C:/Users/user/Downloads/smiling-businessman-presenting-laptop.jpg",
         "weed_detected": true,
         "status": "Weeds Detected"
-      },
-      {
-        "timestamp": "2025-07-29T21:47:34.271223",
-        "image_path": "C:/Users/user/Downloads/smiling-businessman-presenting-laptop.jpg",
-        "weed_detected": false,
-        "detection_count": 0,
-        "confidence": 0.0,
-        "status": "Clean"
       }
     ]
-  },
-  "fredpeaceful@gmail.com": {
-    "name": "fred",
-    "password": "weed123",
-    "location": "nkanu",
-    "farm_size": "1",
-    "phone": "08070718415",
-    "registration_date": "2025-07-31T03:41:50.419309",
-    "detections": [
-      {
-        "timestamp": "2025-07-31T03:43:12.317610",
-        "image_path": "C:/Users/user/Downloads/rice-weed-detector/extracted_frames/frame_000090.jpg",
-        "weed_detected": false,
-        "detection_count": 0,
-        "confidence": 0.0,
-        "status": "Clean"
-      }
-    ]
-  }
-}
+  }} 

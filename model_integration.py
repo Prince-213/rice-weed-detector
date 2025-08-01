@@ -10,11 +10,11 @@ import cv2
 import os
 import sys
 
-class YOLOv11WeedDetector:
-    def __init__(self, model_path="yolov8n.pt", confidence_threshold=0.5):
+class YOLOv8WeedDetector:
+    def __init__(self, model_path="best.pt", confidence_threshold=0.5):
         """
-        Initialize YOLOv11 model for weed detection using supervision
-        
+        Initialize YOLOv8 model for weed detection using supervision
+
         Args:
             model_path (str): Path to your trained YOLOv11 model
             confidence_threshold (float): Minimum confidence for detections
@@ -33,8 +33,8 @@ class YOLOv11WeedDetector:
                 
                 # Try to download a default model
                 try:
-                    self.model = YOLO('yolov8n.pt')  # This will auto-download
-                    print("Successfully downloaded and loaded YOLOv8n model")
+                    self.model = YOLO('best.pt')  # This will auto-download
+                    print("Successfully downloaded and loaded best.pt model")
                 except Exception as download_error:
                     print(f"Failed to download default model: {download_error}")
                     return

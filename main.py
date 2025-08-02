@@ -377,7 +377,7 @@ class RiceWeedDetectorApp:
 
             params = {
                 "from": "Rice Weed Alert <no-reply@kargoxlogistics.com>",
-                "to": ["princolosh@gmail.com"],
+                "to": [self.current_user],
                 "subject": f"RICE WEED ALERT - {self.current_user}",
                 "html": f"""
                 <h2>Dear {user_data['name']}</h2>

@@ -12,6 +12,48 @@
         "image_path": "C:/Users/user/Downloads/smiling-businessman-presenting-laptop.jpg",
         "weed_detected": true,
         "status": "Weeds Detected"
+      },
+      {
+        "timestamp": "2025-08-15T20:19:56.056364",
+        "image_path": "webcam_capture",
+        "weed_detected": false,
+        "detection_count": 0,
+        "confidence": 0.0,
+        "status": "Clean"
+      },
+      {
+        "timestamp": "2025-08-15T20:20:28.412643",
+        "image_path": "webcam_capture",
+        "weed_detected": false,
+        "detection_count": 0,
+        "confidence": 0.0,
+        "status": "Clean"
+      },
+      {
+        "timestamp": "2025-08-15T20:20:29.750716",
+        "image_path": "webcam_capture",
+        "weed_detected": false,
+        "detection_count": 0,
+        "confidence": 0.0,
+        "status": "Clean"
+      },
+      {
+        "timestamp": "2025-08-15T20:21:31.029337",
+        "image_path": "webcam_capture",
+        "weed_detected": true,
+        "detection_count": 1,
+        "confidence": 0.6346210837364197,
+        "status": "1 Weeds Detected"
       }
     ]
-  }} 
+  },
+  "princotekki@gmail.com": {
+    "name": "Patrick Saint",
+    "password": "123",
+    "location": "Newe",
+    "farm_size": "100",
+    "phone": "090",
+    "registration_date": "2025-08-06T00:34:25.572826",
+    "detections": []
+  }
+}
